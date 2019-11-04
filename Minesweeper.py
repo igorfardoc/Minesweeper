@@ -2,8 +2,7 @@
 from random import randint
 import xlsxwriter
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTableWidget, QTableWidgetItem
-from PyQt5.QtWidgets import QRadioButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTableWidgetItem
 import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize, Qt, QTimer
@@ -420,12 +419,16 @@ class Game(QMainWindow):
         cur = self.con.cursor()
         p_id = cur.execute('''SELECT id FROM players
         WHERE name = "''' + self.user_name + '"').fetchone()[0]
-        cur.execute('INSERT INTO games VALUES(' + str(p_id) + ', ' + str(self.level) + ', 1, ' + str(self.time) + ')')
+        cur.execute('INSERT INTO games VALUES(' + str(p_id) +
+                    ', ' + str(self.level) + ', 1, ' + str(self.time) + ')')
         self.con.commit()
         self.win_draw()
     
     def win_draw(self):
         '''Draw end pole of game, when player win'''
+        self.bomb_label.setText('Вы выиграли')
+        width = 25 * self.size + 40
+        self.bomb_label.move(width / 2 - 60, 25 * self.size + 63)
         for i in range(self.size):
             for j in range(self.size):
                 info = self.pole.get_info_cell(i, j)
@@ -440,15 +443,19 @@ class Game(QMainWindow):
         '''Process end of game, when player lose'''
         self.game_now = False
         self.timer.stop()
+        self.end_draw(x, y)
         cur = self.con.cursor()
         p_id = cur.execute('''SELECT id FROM players
         WHERE name = "''' + self.user_name + '"').fetchone()[0]
-        cur.execute('INSERT INTO games VALUES(' + str(p_id) + ', ' + str(self.level) + ', 0, ' + str(self.time) + ')')
-        self.con.commit()
-        self.end_draw(x, y)
+        cur.execute('INSERT INTO games VALUES(' + str(p_id) + ', ' + 
+                    str(self.level) + ', 0, ' + str(self.time) + ')')
+        self.con.commit()        
     
     def end_draw(self, x, y):
         '''Draw end pole of game, when player lose'''
+        self.bomb_label.setText('Вы проиграли')
+        width = 25 * self.size + 40
+        self.bomb_label.move(width / 2 - 65, 25 * self.size + 63)
         for i in range(self.size):
             for j in range(self.size):
                 info = self.pole.get_info_cell(i, j)
